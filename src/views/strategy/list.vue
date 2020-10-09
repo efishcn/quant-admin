@@ -150,9 +150,13 @@ export default {
       }
     },
     confirmEdit(row) {
+      var path = "/strategy/index";
+      if (row.strategyType === 1) {
+        path = "/strategy/indicator";
+      }
       //修改策略
       this.$router.push({
-        path: "/strategy/index",
+        path: path,
         query: {
           id: row.id
         }

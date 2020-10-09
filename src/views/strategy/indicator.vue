@@ -3,6 +3,21 @@
     <el-row :gutter="15">
       <el-card class="box-card">
         <div slot="header" class="clearfix">
+          <span>基础设置 :</span>
+        </div>
+        <el-form label-width="80px">
+          <el-form-item label="策略名称:">
+            <el-col :span="6">
+              <el-input v-model="baseInfo.strategyName" placeholder="名称为了辨别策略,最好不要起重复的名称"></el-input>
+            </el-col>
+          </el-form-item>
+        </el-form>
+      </el-card>
+    </el-row>
+
+    <el-row :gutter="15">
+      <el-card class="box-card">
+        <div slot="header" class="clearfix">
           <span>步骤一 :k线选择（交易对和k线数据量仅回测时候用）</span>
         </div>
         <el-form label-width="80px">
@@ -82,7 +97,7 @@
           <el-table-column prop="condition" label="指标关系" width="180"></el-table-column>
           <el-table-column prop="ruleFirst.name" label="名称" width="180"></el-table-column>
           <el-table-column prop="compare.label" label="比较" width="180"></el-table-column>
-          <el-table-column prop="ruleSecond.name" label="名称" width="180"></el-table-column>
+          <el-table-column prop="ruleSecond.value" label="名称" width="180"></el-table-column>
           <el-table-column fixed="right" label="操作">
             <template slot-scope="scope">
               <el-button
@@ -112,7 +127,7 @@
           <el-table-column prop="condition" label="指标关系" width="180"></el-table-column>
           <el-table-column prop="ruleFirst.name" label="名称" width="180"></el-table-column>
           <el-table-column prop="compare.label" label="比较" width="180"></el-table-column>
-          <el-table-column prop="ruleSecond.name" label="名称" width="180"></el-table-column>
+          <el-table-column prop="ruleSecond.value" label="名称" width="180"></el-table-column>
           <el-table-column fixed="right" label="操作">
             <template slot-scope="scope">
               <el-button
@@ -261,6 +276,7 @@
 <script>
 import VeLine from "v-charts/lib/line.common";
 import "echarts/lib/component/markLine";
+import { addOrUpdateIndicatorStrategy, getStrategyById } from "@/api/strategy.js";
 import { backTest } from "@/api/indicator.js";
 export default {
   name: "InlineEditTable",
@@ -273,6 +289,7 @@ export default {
       }
     };
     this.markLine = {
+      symbol:"none",
       data: [
         {
           name: "买入",
@@ -285,6 +302,92 @@ export default {
       ]
     };
     return {
+      id: "",
+      title: "创建",
+      baseInfo: {
+        strategyName: "",
+        buyAmount: "",
+        sellAmount: "",
+        buyPrice: "",
+        sellPrice: "",
+        isAllBuy: true,
+        isAllSell: true,
+        sleep: "3",
+        profit: 1,
+        buyAllWeights: 0,
+        sellAllWeights: 0,
+        isLimitPrice: true,
+        buyQuotaPrice: ""
+      },
+      baseData: {
+        stopLoss: 0,
+        stopGain: 0,
+        kline: "",
+        size: "",
+        symbol:"",
+        indicatorBuy:[
+          {
+            condition: "",
+            compare: {
+              value:"",
+              label:""
+            },
+            ruleFirst: {
+              name:"",
+              value:"",
+              params:"",
+              source:{
+                name:"",
+                value:"",
+                source:"",
+                params:""
+              }
+            },
+            ruleSecond: {
+              name:"",
+              value:"",
+              params:"",
+              source:{
+                name:"",
+                value:"",
+                source:"",
+                params:""
+              }
+            }
+          }
+        ],
+        indicatorSell:[
+          {
+            condition: "",
+            compare: {
+              value:"",
+              label:""
+            },
+            ruleFirst: {
+              name:"",
+              value:"",
+              params:"",
+              source:{
+                name:"",
+                value:"",
+                source:"",
+                params:""
+              }
+            },
+            ruleSecond: {
+              name:"",
+              value:"",
+              params:"",
+              source:{
+                name:"",
+                value:"",
+                source:"",
+                params:""
+              }
+            }
+          }
+        ]
+      },
       isBuy: true,
       numBool: false,
       dialogVisible: false, //添加指标的dialog
@@ -352,6 +455,58 @@ export default {
     };
   },
   created() {
+    const id = this.$route.query.id;
+    this.id = id;
+    if (this.id !== undefined) {
+      this.title = "修改";
+      var params = {
+        id: this.id
+      };
+      const data = getStrategyById(params).then(data => {
+        data = data.data;
+        this.baseData = JSON.parse(data.setting1);
+        this.baseInfo.strategyName = data.strategyName;
+        this.baseInfo.buyAllWeights = data.buyAllWeights;
+        this.baseInfo.sellAllWeights = data.sellAllWeights;
+        this.baseInfo.profit = data.profit;
+        this.baseInfo.sleep = data.sleep;
+
+        if (data.isLimitPrice === 1) {
+          //限价
+          this.baseInfo.isLimitPrice = true;
+          this.baseInfo.buyPrice = data.buyPrice;
+          this.baseInfo.sellPrice = data.sellPrice;
+
+          if (data.isAllBuy === 1) {
+            //全部买
+            this.baseInfo.isAllBuy = true;
+          } else {
+            this.baseInfo.isAllBuy = false;
+            this.baseInfo.buyAmount = data.buyAmount;
+          }
+        } else {
+          //市价 没有购买 卖出 价格设置
+          this.baseInfo.isLimitPrice = false;
+          if (data.isAllBuy === 1) {
+            //全部买
+            this.baseInfo.isAllBuy = true;
+          } else {
+            this.baseInfo.isAllBuy = false;
+            this.baseInfo.buyQuotaPrice = data.buyQuotaPrice;
+          }
+        }
+
+        if (data.isAllSell === 1) {
+          //全部卖
+          this.baseInfo.isAllSell = true;
+        } else {
+          this.baseInfo.isAllSell = false;
+          this.baseInfo.sellAmount = data.sellAmount;
+        }
+      });
+    } else {
+      title: "创建";
+    }
     var ls = [
       {
         name: "价格",
@@ -373,7 +528,25 @@ export default {
       this.chartData.rows = data.data.data;
       this.markLine.data = data.data.buyOrSell;
     },
-    handleSave() {},
+    async handleSave() {
+      var requestData = {
+        id: this.id,
+        baseInfo: this.baseInfo,
+        baseData: this.baseData
+      };
+      const data = await addOrUpdateIndicatorStrategy(requestData);
+      if (data.code === 20000) {
+        this.$notify({
+          title: "操作成功",
+          message: this.id === undefined ? "创建成功！！！" : "修改成功！！！",
+          type: "success",
+          duration: 2000
+        });
+        this.id = data.data;
+        this.title = "修改策略";
+        // this.$router.push({ path: "/strategy/list" });
+      }
+    },
     addIndicator() {
       var cloneOfA = JSON.parse(JSON.stringify(this.indicator));
       this.indicatorList.push(cloneOfA);

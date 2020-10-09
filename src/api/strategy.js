@@ -11,6 +11,16 @@ export function addOrUpdateStrategy(data) {
   })
 }
 /**
+ * 添加策略
+ */
+export function addOrUpdateIndicatorStrategy(data) {
+  return request({
+    url: '/strategy/addOrUpdateIndicatorStrategy',
+    method: 'post',
+    data: data
+  })
+}
+/**
  * 获取策略
  */
 export function getStrategys() {
