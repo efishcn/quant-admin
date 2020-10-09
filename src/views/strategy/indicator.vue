@@ -309,11 +309,11 @@ export default {
           label: "数值比较",
           options: [
             {
-              value: "num_up",
+              value: "num_over",
               label: "大于"
             },
             {
-              value: "num_down",
+              value: "num_under",
               label: "小于"
             },
             {
@@ -326,11 +326,11 @@ export default {
           label: "交叉指标",
           options: [
             {
-              value: "cross_up",
+              value: "num_cross_up",
               label: "交叉向上"
             },
             {
-              value: "cross_down",
+              value: "num_cross_down",
               label: "交叉向下"
             }
           ]
