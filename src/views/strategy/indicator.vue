@@ -26,8 +26,10 @@
               <el-select v-model="baseData.kline" placeholder="请选择k线类型">
                 <el-option label="1分钟" value="1min"></el-option>
                 <el-option label="5分钟" value="5min"></el-option>
+                <el-option label="15分钟" value="15min"></el-option>
                 <el-option label="30分钟" value="30min"></el-option>
                 <el-option label="60分钟" value="60min"></el-option>
+                <el-option label="4小时" value="4hour"></el-option>
                 <el-option label="一天" value="1day"></el-option>
                 <el-option label="一月" value="1mon"></el-option>
                 <el-option label="一周" value="1week"></el-option>
@@ -188,6 +190,7 @@
         <el-form-item label="指标选择">
           <el-select v-model="indicator.value" placeholder="请选择指标">
             <el-option label="RSI-相对强弱指数" value="RSI"></el-option>
+            <el-option label="MACD-移动平均线指数" value="MACD"></el-option>
             <el-option label="ADX-平均趋向指标" value="ADX"></el-option>
             <el-option label="SMA-简单移动平均线" value="SMA"></el-option>
             <el-option label="EMA-指数移动平均线" value="EMA"></el-option>
